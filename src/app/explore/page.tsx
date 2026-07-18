@@ -47,7 +47,7 @@ export default function ExplorePage() {
       if (category !== 'All') params.append('category', category);
       params.append('sort', sort);
       params.append('page', page.toString());
-      params.append('limit', '8');
+      params.append('limit', '4');
       
       const res = await api.get(`/projects/public?${params.toString()}`);
       return res.data;
@@ -222,7 +222,7 @@ export default function ExplorePage() {
             </div>
 
             {/* Pagination Controls */}
-            {pagination && pagination.pages > 1 && (
+            {pagination && (
               <div className="flex justify-center items-center gap-4 mt-16">
                 <button 
                   onClick={() => setPage(p => Math.max(1, p - 1))}
