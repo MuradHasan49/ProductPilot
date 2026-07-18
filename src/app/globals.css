@@ -1,26 +1,83 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #030303;
+  --foreground: #f3f4f6;
+  
+  --primary: #8b5cf6;
+  --primary-hover: #7c3aed;
+  
+  --secondary: #06b6d4;
+  
+  --surface: #111111;
+  --surface-hover: #1a1a1a;
+  
+  --border: #262626;
+  
+  --text-muted: #a3a3a3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-text-muted: var(--text-muted);
+  
+  --font-sans: var(--font-inter), sans-serif;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism Utilities */
+@layer utilities {
+  .glass {
+    background: rgba(17, 17, 17, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-card {
+    background: linear-gradient(145deg, rgba(26,26,26,0.8) 0%, rgba(17,17,17,0.4) 100%);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .text-gradient {
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  50% { opacity: .8; filter: brightness(1.2); }
 }
