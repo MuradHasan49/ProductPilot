@@ -47,7 +47,7 @@ export default function ExplorePage() {
       if (category !== 'All') params.append('category', category);
       params.append('sort', sort);
       params.append('page', page.toString());
-      params.append('limit', '4');
+      params.append('limit', '8');
       
       const res = await api.get(`/projects/public?${params.toString()}`);
       return res.data;
