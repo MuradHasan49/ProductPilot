@@ -4,6 +4,7 @@ import "./globals.css";
 import { ConditionalNavbar, ConditionalFooter } from "@/components/layout/ConditionalLayout";
 import Providers from "@/components/Providers";
 import AIChatWidget from "@/components/ui/AIChatWidget";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -33,6 +34,7 @@ export default function RootLayout({
           </main>
           <ConditionalFooter />
           <AIChatWidget />
+          <Toaster theme="dark" richColors />
         </Providers>
       </body>
     </html>

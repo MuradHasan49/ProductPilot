@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Plus, Search, FolderKanban, MoreVertical, Calendar, Sparkles, X } from 'lucide-react';
+import { Plus, Search, FolderKanban, MoreVertical, Calendar, Sparkles, X, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Project {
   _id: string;
@@ -45,10 +46,10 @@ export default function ManageProjectsPage() {
     try {
       setIsBulkClassifying(true);
       const res = await api.post('/ai/bulk-classify');
-      alert(res.data.message);
+      toast.success(res.data.message);
       refetch();
     } catch (err: any) {
-      alert('Failed to bulk classify projects.');
+      toast.error('Failed to bulk classify projects.');
     } finally {
       setIsBulkClassifying(false);
     }
@@ -62,9 +63,24 @@ export default function ManageProjectsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       setEditingProject(null);
+      toast.success("Project updated successfully");
     },
     onError: () => {
-      alert("Failed to update project");
+      toast.error("Failed to update project");
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/projects/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setEditingProject(null);
+      toast.success("Project deleted successfully");
+    },
+    onError: () => {
+      toast.error("Failed to delete project");
     }
   });
 
@@ -72,6 +88,17 @@ export default function ManageProjectsPage() {
     e.stopPropagation();
     setEditingProject(project);
     setEditForm({ title: project.title, category: project.category, visibility: project.visibility });
+  };
+
+  const getCategoryGradient = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'saas': return 'from-blue-500/10 to-cyan-500/5';
+      case 'ai tool': return 'from-purple-500/10 to-pink-500/5';
+      case 'marketplace': return 'from-emerald-500/10 to-teal-500/5';
+      case 'mobile app': return 'from-orange-500/10 to-yellow-500/5';
+      case 'web app': return 'from-indigo-500/10 to-blue-500/5';
+      default: return 'from-gray-500/10 to-slate-500/5';
+    }
   };
 
   return (
@@ -144,10 +171,10 @@ export default function ManageProjectsPage() {
           {filteredProjects.map((project) => (
             <Card 
               key={project._id} 
-              className="hover:border-primary/50 cursor-pointer transition-colors group flex flex-col relative"
+              className={`hover:border-primary/50 cursor-pointer transition-all duration-300 group flex flex-col relative overflow-hidden bg-gradient-to-br ${getCategoryGradient(project.category)}`}
               onClick={() => router.push(`/dashboard/projects/${project._id}`)}
             >
-              <CardHeader className="pb-3 flex flex-row items-start justify-between">
+              <CardHeader className="pb-3 flex flex-row items-start justify-between relative z-10">
                 <div>
                   <CardTitle className="mb-2 line-clamp-1 group-hover:text-primary transition-colors">
                     {project.title}
@@ -166,7 +193,7 @@ export default function ManageProjectsPage() {
                   <MoreVertical className="w-5 h-5" />
                 </button>
               </CardHeader>
-              <CardContent className="mt-auto">
+              <CardContent className="mt-auto relative z-10">
                 <div className="flex items-center gap-2 text-sm text-text-muted mt-4">
                   <Calendar className="w-4 h-4" />
                   <span>Created {new Date(project.createdAt).toLocaleDateString()}</span>
@@ -222,11 +249,27 @@ export default function ManageProjectsPage() {
                   <option value="public">Public (Visible in Explore)</option>
                 </select>
               </div>
-              <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-border">
-                <Button variant="outline" onClick={() => setEditingProject(null)}>Cancel</Button>
-                <Button onClick={() => updateMutation.mutate(editForm)} disabled={updateMutation.isPending || !editForm.title.trim()}>
-                  {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+              <div className="flex items-center justify-between mt-8 pt-4 border-t border-border">
+                <Button 
+                  variant="outline" 
+                  className="text-red-400 border-red-500/20 hover:bg-red-500/10 hover:border-red-500/30"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if(confirm('Are you sure you want to delete this project? This cannot be undone.')) {
+                      deleteMutation.mutate(editingProject._id);
+                    }
+                  }}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
                 </Button>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setEditingProject(null)}>Cancel</Button>
+                  <Button onClick={() => updateMutation.mutate(editForm)} disabled={updateMutation.isPending || !editForm.title.trim()}>
+                    {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

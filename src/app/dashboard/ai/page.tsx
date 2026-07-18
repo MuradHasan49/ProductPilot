@@ -4,10 +4,11 @@ import { useState, useRef, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
+import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Send, Bot, Sparkles, FileText, ListTodo, FileJson } from 'lucide-react';
+import { Send, Bot, Sparkles, FileText, ListTodo, FileJson, Edit2, Save } from 'lucide-react';
 
 export default function AIWorkspacePage() {
   const searchParams = useSearchParams();
@@ -20,6 +21,8 @@ export default function AIWorkspacePage() {
   const [generatedDoc, setGeneratedDoc] = useState<string | null>(null);
   const [docType, setDocType] = useState<string>('Document');
   const [docLength, setDocLength] = useState<string>('medium');
+  const [isEditingDoc, setIsEditingDoc] = useState(false);
+  const [docTitle, setDocTitle] = useState('');
   
   const [ideaInput, setIdeaInput] = useState('');
   
@@ -61,7 +64,28 @@ export default function AIWorkspacePage() {
     },
     onSuccess: (data, variables) => {
       setGeneratedDoc(data);
-      setDocType(variables === 'prd' ? 'Product Requirements Document' : 'User Stories');
+      setDocType(variables === 'prd' ? 'PRD' : 'User Stories');
+      setDocTitle(`AI Generated ${variables === 'prd' ? 'PRD' : 'User Stories'} - ${new Date().toLocaleDateString()}`);
+      setIsEditingDoc(false);
+    }
+  });
+
+  const saveDocMutation = useMutation({
+    mutationFn: async () => {
+      if (!generatedDoc || !projectId) throw new Error("Missing data");
+      const res = await api.post(`/projects/${projectId}/documents`, {
+        title: docTitle,
+        type: docType,
+        content: generatedDoc
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Document saved to project successfully!");
+      setIsEditingDoc(false);
+    },
+    onError: () => {
+      toast.error("Failed to save document");
     }
   });
 
@@ -227,16 +251,55 @@ export default function AIWorkspacePage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-8 bg-background">
+        <div className="flex-1 overflow-y-auto p-8 bg-background relative group">
           {generatedDoc ? (
-            <div className="max-w-3xl mx-auto">
-              <div className="mb-8 pb-4 border-b border-border">
-                <span className="inline-block px-3 py-1 rounded-full bg-secondary/10 text-secondary text-xs font-semibold mb-2">AI GENERATED</span>
-                <h1 className="text-2xl font-bold">{docType}</h1>
+            <div className="max-w-4xl mx-auto">
+              <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
+                <div>
+                  <span className="inline-block px-3 py-1 rounded-full bg-secondary/10 text-secondary text-xs font-semibold mb-2">
+                    {docType}
+                  </span>
+                  {isEditingDoc ? (
+                    <Input 
+                      value={docTitle} 
+                      onChange={e => setDocTitle(e.target.value)} 
+                      className="text-xl font-bold max-w-sm"
+                    />
+                  ) : (
+                    <h1 className="text-2xl font-bold">{docTitle}</h1>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setIsEditingDoc(!isEditingDoc)}
+                  >
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    {isEditingDoc ? 'Preview' : 'Edit'}
+                  </Button>
+                  <Button 
+                    size="sm"
+                    onClick={() => saveDocMutation.mutate()}
+                    disabled={saveDocMutation.isPending || !generatedDoc.trim()}
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {saveDocMutation.isPending ? 'Saving...' : 'Save to Project'}
+                  </Button>
+                </div>
               </div>
-              <article className="prose prose-invert prose-blue max-w-none">
-                <ReactMarkdown>{generatedDoc}</ReactMarkdown>
-              </article>
+              
+              {isEditingDoc ? (
+                <textarea 
+                  value={generatedDoc}
+                  onChange={e => setGeneratedDoc(e.target.value)}
+                  className="w-full min-h-[60vh] bg-surface border border-border rounded-xl p-6 text-foreground font-mono text-sm leading-relaxed outline-none focus:border-primary resize-y"
+                />
+              ) : (
+                <article className="prose prose-invert prose-blue max-w-none prose-pre:bg-surface prose-pre:border-border">
+                  <ReactMarkdown>{generatedDoc}</ReactMarkdown>
+                </article>
+              )}
             </div>
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto">

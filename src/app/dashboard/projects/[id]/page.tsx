@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft, Edit, Sparkles, BrainCircuit } from 'lucide-react';
+import { ArrowLeft, Edit, Sparkles, BrainCircuit, FileText, ListTodo } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ProjectDetailsPage() {
@@ -20,6 +20,18 @@ export default function ProjectDetailsPage() {
       return res.data.data;
     }
   });
+
+  const { data: documents } = useQuery({
+    queryKey: ['documents', projectId],
+    queryFn: async () => {
+      const res = await api.get(`/projects/${projectId}/documents`);
+      return res.data.data;
+    },
+    enabled: !!projectId
+  });
+
+  const prds = documents?.filter((d: any) => d.type === 'PRD') || [];
+  const userStories = documents?.filter((d: any) => d.type === 'User Stories') || [];
 
   if (isLoading) {
     return (
@@ -92,29 +104,65 @@ export default function ProjectDetailsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Product Requirements Document (PRD)</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              Product Requirements Documents
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-10">
-              <p className="text-text-muted mb-4">No PRD generated yet.</p>
-              <Link href={`/dashboard/ai?project=${project._id}`}>
-                <Button variant="outline" size="sm">Generate PRD</Button>
-              </Link>
-            </div>
+            {prds.length > 0 ? (
+              <div className="space-y-4">
+                {prds.map((doc: any) => (
+                  <div key={doc._id} className="p-4 rounded-xl border border-border bg-surface-hover hover:border-primary/50 transition-colors">
+                    <h4 className="font-semibold mb-1">{doc.title}</h4>
+                    <p className="text-sm text-text-muted mb-3 line-clamp-2">{doc.content.substring(0, 150)}...</p>
+                    <div className="flex items-center justify-between text-xs text-text-muted">
+                      <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                      <Link href={`/dashboard/ai?project=${project._id}`} className="text-primary hover:underline font-medium">Open in Workspace &rarr;</Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 bg-surface rounded-xl border border-dashed border-border">
+                <p className="text-text-muted mb-4">No PRD generated yet.</p>
+                <Link href={`/dashboard/ai?project=${project._id}`}>
+                  <Button variant="outline" size="sm">Generate PRD</Button>
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>User Stories</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <ListTodo className="w-5 h-5 text-secondary" />
+              User Stories
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-10">
-              <p className="text-text-muted mb-4">No user stories found.</p>
-              <Link href={`/dashboard/ai?project=${project._id}`}>
-                <Button variant="outline" size="sm">Generate Stories</Button>
-              </Link>
-            </div>
+            {userStories.length > 0 ? (
+              <div className="space-y-4">
+                {userStories.map((doc: any) => (
+                  <div key={doc._id} className="p-4 rounded-xl border border-border bg-surface-hover hover:secondary/50 transition-colors">
+                    <h4 className="font-semibold mb-1">{doc.title}</h4>
+                    <p className="text-sm text-text-muted mb-3 line-clamp-2">{doc.content.substring(0, 150)}...</p>
+                    <div className="flex items-center justify-between text-xs text-text-muted">
+                      <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                      <Link href={`/dashboard/ai?project=${project._id}`} className="text-secondary hover:underline font-medium">Open in Workspace &rarr;</Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 bg-surface rounded-xl border border-dashed border-border">
+                <p className="text-text-muted mb-4">No user stories found.</p>
+                <Link href={`/dashboard/ai?project=${project._id}`}>
+                  <Button variant="outline" size="sm">Generate Stories</Button>
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
