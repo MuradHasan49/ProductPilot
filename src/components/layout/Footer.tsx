@@ -1,15 +1,25 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Footer() {
   return (
     <footer className="w-full border-t border-border bg-surface mt-auto py-12">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="col-span-1 md:col-span-2">
-          <Link href="/" className="text-2xl font-bold tracking-tighter text-gradient">
-            LaunchPilot
+          <Link href="/" className="flex items-center gap-2 group">
+            <Image 
+              src="/logo.png" 
+              alt="ProductPilot Logo" 
+              width={24} 
+              height={24} 
+              className="group-hover:scale-110 transition-transform duration-300 opacity-80"
+            />
+            <span className="text-2xl font-bold tracking-tighter text-gradient">
+              ProductPilot
+            </span>
           </Link>
           <p className="mt-4 text-text-muted text-sm max-w-sm">
-            The AI-powered co-founder that helps you validate, plan, and launch your next big idea faster than ever.
+            Plan Smarter. Build Faster. Powered by AI.
           </p>
         </div>
         <div>
@@ -30,7 +40,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="container mx-auto px-4 mt-12 pt-8 border-t border-border text-center text-sm text-text-muted">
-        &copy; {new Date().getFullYear()} LaunchPilot AI. All rights reserved.
+        &copy; {new Date().getFullYear()} ProductPilot AI. All rights reserved.
       </div>
     </footer>
   );

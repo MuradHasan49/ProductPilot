@@ -2,11 +2,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('cf_token')?.value;
+  const token = request.cookies.get('pp_token')?.value;
 
-  const isProtectedRoute = 
-    request.nextUrl.pathname.startsWith('/dashboard') || 
-    request.nextUrl.pathname.startsWith('/ideas');
+  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard');
 
   if (isProtectedRoute && !token) {
     const loginUrl = new URL('/login', request.url);
@@ -26,7 +24,6 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
-    '/ideas/:path*',
     '/login',
     '/register'
   ],

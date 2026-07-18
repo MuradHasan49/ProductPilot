@@ -1,20 +1,28 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
-  --background: #030303;
-  --foreground: #f3f4f6;
+  --background: #09090b;
+  --foreground: #fafafa;
   
-  --primary: #8b5cf6;
-  --primary-hover: #7c3aed;
+  --primary: #2563EB; /* Blue */
+  --primary-hover: #1d4ed8;
   
-  --secondary: #06b6d4;
+  --secondary: #4F46E5; /* Indigo */
   
-  --surface: #111111;
-  --surface-hover: #1a1a1a;
+  --accent: #10B981; /* Emerald */
   
-  --border: #262626;
+  --surface: #18181b;
+  --surface-hover: #27272a;
   
-  --text-muted: #a3a3a3;
+  --border: #27272a;
+  
+  --text-muted: #a1a1aa;
+  
+  --success: #22c55e;
+  --warning: #eab308;
+  --error: #ef4444;
+  --info: #3b82f6;
 }
 
 @theme inline {
@@ -23,10 +31,15 @@
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
   --color-surface: var(--surface);
   --color-surface-hover: var(--surface-hover);
   --color-border: var(--border);
   --color-text-muted: var(--text-muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
   
   --font-sans: var(--font-inter), sans-serif;
 }
@@ -42,14 +55,14 @@ body {
 /* Glassmorphism Utilities */
 @layer utilities {
   .glass {
-    background: rgba(17, 17, 17, 0.7);
+    background: rgba(24, 24, 27, 0.7);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .glass-card {
-    background: linear-gradient(145deg, rgba(26,26,26,0.8) 0%, rgba(17,17,17,0.4) 100%);
+    background: linear-gradient(145deg, rgba(39,39,42,0.8) 0%, rgba(24,24,27,0.4) 100%);
     backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);

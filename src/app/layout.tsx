@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import { ConditionalNavbar, ConditionalFooter } from "@/components/layout/ConditionalLayout";
 import Providers from "@/components/Providers";
 
 const inter = Inter({
@@ -11,8 +10,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "LaunchPilot AI | Your Startup Co-Founder",
-  description: "AI-powered startup assistant to validate, plan, and launch your ideas.",
+  title: "ProductPilot AI | Product Management Copilot",
+  description: "Plan Smarter. Build Faster. Powered by AI.",
 };
 
 export default function RootLayout({
@@ -27,11 +26,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Providers>
-          <Navbar />
+          <ConditionalNavbar />
           <main className="flex-1 flex flex-col">
             {children}
           </main>
-          <Footer />
+          <ConditionalFooter />
         </Providers>
       </body>
     </html>

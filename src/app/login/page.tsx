@@ -1,102 +1,89 @@
 "use client";
-import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { api } from '@/lib/api';
+import { useAuthStore } from '@/store/useAuthStore';
+
+const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormValues) => {
     try {
-      const res = await api.post("/auth/login", { email, password });
+      setError(null);
+      const res = await api.post('/auth/login', data);
       if (res.data.success) {
         setUser(res.data.data);
-        router.push("/dashboard");
+        router.push('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "An error occurred");
-    } finally {
-      setLoading(false);
+      setError(err.response?.data?.message || 'Failed to login');
     }
   };
 
-  const handleDemoLogin = () => {
-    setEmail("demo@launchpilot.ai");
-    setPassword("demo123");
-  };
-
   return (
-    <div className="flex-1 flex items-center justify-center py-20 px-4">
-      <div className="w-full max-w-md glass-card p-8 rounded-2xl">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
+      <div className="w-full max-w-md p-8 bg-surface rounded-[16px] border border-border glass-card">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome Back</h1>
-          <p className="text-text-muted text-sm">Sign in to your LaunchPilot account</p>
+          <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
+          <p className="text-text-muted">Log in to ProductPilot AI</p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm text-center">
+          <div className="mb-6 p-3 bg-error/10 border border-error/20 text-error text-sm rounded-lg">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-text-muted mb-1">Email Address</label>
-            <input 
-              type="email" 
-              className="w-full px-4 py-3 rounded-xl bg-surface border border-border text-foreground focus:outline-none focus:border-primary transition-colors"
-              placeholder="you@startup.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-sm font-medium text-text-muted">Password</label>
-              <Link href="#" className="text-xs text-primary hover:underline">Forgot password?</Link>
-            </div>
-            <input 
-              type="password" 
-              className="w-full px-4 py-3 rounded-xl bg-surface border border-border text-foreground focus:outline-none focus:border-primary transition-colors"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Input
+            label="Email Address"
+            type="email"
+            placeholder="name@company.com"
+            {...register('email')}
+            error={errors.email?.message}
+          />
           
-          <button type="submit" className="w-full py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20">
+          <Input
+            label="Password"
+            type="password"
+            placeholder="••••••••"
+            {...register('password')}
+            error={errors.password?.message}
+          />
+
+          <Button type="submit" className="w-full mt-6" isLoading={isSubmitting}>
             Sign In
-          </button>
+          </Button>
         </form>
 
-        <div className="my-6 flex items-center">
-          <div className="flex-grow border-t border-border"></div>
-          <span className="flex-shrink-0 mx-4 text-text-muted text-sm">or</span>
-          <div className="flex-grow border-t border-border"></div>
-        </div>
-
-        <button 
-          onClick={handleDemoLogin}
-          type="button"
-          className="w-full py-3 rounded-xl bg-secondary/10 text-secondary border border-secondary/20 font-semibold hover:bg-secondary/20 transition-colors"
-        >
-          Use Demo Account
-        </button>
-
-        <p className="mt-8 text-center text-sm text-text-muted">
-          Don't have an account? <Link href="/register" className="text-primary hover:underline">Sign up</Link>
+        <p className="mt-6 text-center text-sm text-text-muted">
+          Don't have an account?{' '}
+          <Link href="/register" className="text-primary hover:underline">
+            Sign up
+          </Link>
         </p>
       </div>
     </div>

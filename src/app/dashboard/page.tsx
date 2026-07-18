@@ -1,167 +1,107 @@
 "use client";
-import Link from 'next/link';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
-import { PlusCircle, Rocket, BarChart3, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
+import { FolderKanban, Sparkles, Code2, Users } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-import { Skeleton } from '@/components/ui/Skeleton';
+const mockChartData = [
+  { name: 'Mon', usage: 12 },
+  { name: 'Tue', usage: 19 },
+  { name: 'Wed', usage: 15 },
+  { name: 'Thu', usage: 22 },
+  { name: 'Fri', usage: 28 },
+  { name: 'Sat', usage: 10 },
+  { name: 'Sun', usage: 35 },
+];
 
-export default function DashboardPage() {
+export default function DashboardHome() {
   const user = useAuthStore((state) => state.user);
 
-  const { data: startups, isLoading } = useQuery({
-    queryKey: ['startups'],
-    queryFn: async () => {
-      const res = await api.get('/startups');
-      return res.data.data;
-    }
-  });
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-12 flex-1">
-        <div className="flex justify-between items-center mb-10">
-          <div>
-            <Skeleton className="h-10 w-64 mb-2" />
-            <Skeleton className="h-5 w-80" />
-          </div>
-          <Skeleton className="h-12 w-48 rounded-xl" />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 rounded-2xl" />)}
-            </div>
-            <Skeleton className="h-[400px] rounded-2xl" />
-          </div>
-          <Skeleton className="h-[600px] rounded-2xl" />
-        </div>
-      </div>
-    );
-  }
-
-  // Dummy chart data for empty states
-  const chartData = [
-    { name: 'Week 1', score: 20 },
-    { name: 'Week 2', score: 35 },
-    { name: 'Week 3', score: 55 },
-    { name: 'Week 4', score: 45 },
-    { name: 'Week 5', score: 80 },
-    { name: 'Week 6', score: 95 },
+  const stats = [
+    { title: 'Active Projects', value: '3', icon: FolderKanban, color: 'text-primary' },
+    { title: 'AI Documents Generated', value: '24', icon: Sparkles, color: 'text-secondary' },
+    { title: 'User Stories', value: '142', icon: Code2, color: 'text-accent' },
+    { title: 'Team Members', value: '1', icon: Users, color: 'text-info' },
   ];
 
   return (
-    <div className="container mx-auto px-4 py-12 flex-1">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Welcome back, {user?.name.split(' ')[0]}</h1>
-          <p className="text-text-muted mt-1">Here's an overview of your startup portfolio.</p>
-        </div>
-        <Link href="/ideas/add" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-medium hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20">
-          <PlusCircle size={20} />
-          <span>New Startup Idea</span>
-        </Link>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome back, {user?.name || 'Builder'}</h1>
+        <p className="text-text-muted">Here is an overview of your product development progress.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Left Column: Stats & Chart */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="flex items-center gap-3 mb-2 text-text-muted">
-                <Rocket size={18} className="text-secondary" />
-                <span className="font-medium text-sm">Active Ideas</span>
-              </div>
-              <p className="text-3xl font-bold">{startups?.length || 0}</p>
-            </div>
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="flex items-center gap-3 mb-2 text-text-muted">
-                <AlertTriangle size={18} className="text-orange-400" />
-                <span className="font-medium text-sm">Avg Risk Score</span>
-              </div>
-              <p className="text-3xl font-bold">
-                {startups?.length 
-                  ? Math.round(startups.reduce((acc: number, s: any) => acc + (s.riskScore || 50), 0) / startups.length) 
-                  : 0}/100
-              </p>
-            </div>
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="flex items-center gap-3 mb-2 text-text-muted">
-                <Clock size={18} className="text-primary" />
-                <span className="font-medium text-sm">Pending Tasks</span>
-              </div>
-              <p className="text-3xl font-bold">--</p>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, i) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={i}>
+              <CardContent className="p-6 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-text-muted mb-1">{stat.title}</p>
+                  <h3 className="text-3xl font-bold">{stat.value}</h3>
+                </div>
+                <div className={`p-3 rounded-xl bg-surface-hover border border-border ${stat.color}`}>
+                  <Icon className="w-6 h-6" />
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
-          {/* Activity Chart */}
-          <div className="glass-card p-6 rounded-2xl h-[400px] flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <BarChart3 size={20} className="text-primary" />
-                Startup Readiness Score
-              </h2>
-            </div>
-            <div className="flex-1 w-full min-h-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-                  <XAxis dataKey="name" stroke="#a3a3a3" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#a3a3a3" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#111111', borderColor: '#262626', borderRadius: '12px' }}
-                    itemStyle={{ color: '#8b5cf6' }}
-                  />
-                  <Line type="monotone" dataKey="score" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4, fill: '#8b5cf6' }} activeDot={{ r: 6 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>AI Agent Usage</CardTitle>
+            <CardDescription>Tokens generated by ProductPilot AI over the last 7 days.</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={mockChartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                <XAxis dataKey="name" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }}
+                  itemStyle={{ color: '#f3f4f6' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="usage" 
+                  stroke="#2563EB" 
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: '#2563EB', strokeWidth: 0 }}
+                  activeDot={{ r: 6, fill: '#4F46E5', strokeWidth: 0 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-        {/* Right Column: Your Startups List */}
-        <div className="glass-card p-6 rounded-2xl flex flex-col max-h-[calc(100vh-200px)]">
-          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-            <Rocket size={20} className="text-secondary" />
-            Your Ideas
-          </h2>
-          
-          <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-            {startups?.length === 0 ? (
-              <div className="text-center py-10">
-                <p className="text-text-muted text-sm mb-4">You haven't added any startup ideas yet.</p>
-                <Link href="/ideas/add" className="text-primary text-sm font-medium hover:underline">
-                  Create your first idea &rarr;
-                </Link>
-              </div>
-            ) : (
-              startups?.map((startup: any) => (
-                <Link href={`/ideas/${startup._id}/manage`} key={startup._id} className="block group">
-                  <div className="p-4 rounded-xl bg-surface border border-border group-hover:border-primary/50 transition-colors">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{startup.ideaName}</h3>
-                      <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded bg-secondary/10 text-secondary font-semibold">
-                        {startup.status}
-                      </span>
-                    </div>
-                    <p className="text-sm text-text-muted line-clamp-2 mb-3">{startup.pitch}</p>
-                    <div className="flex items-center justify-between text-xs font-medium text-text-muted">
-                      <span>{startup.industry}</span>
-                      <span className="flex items-center gap-1 text-primary group-hover:translate-x-1 transition-transform">
-                        Manage <ArrowRight size={14} />
-                      </span>
-                    </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>Your latest project updates.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { action: 'Generated PRD', project: 'E-commerce App', time: '2 hours ago' },
+                { action: 'Created User Stories', project: 'SaaS Platform', time: '5 hours ago' },
+                { action: 'Created Project', project: 'Fitness Tracker', time: '1 day ago' },
+              ].map((activity, i) => (
+                <div key={i} className="flex items-start gap-4">
+                  <div className="w-2 h-2 rounded-full bg-primary mt-2"></div>
+                  <div>
+                    <p className="text-sm font-medium">{activity.action}</p>
+                    <p className="text-xs text-text-muted">{activity.project} • {activity.time}</p>
                   </div>
-                </Link>
-              ))
-            )}
-          </div>
-        </div>
-
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
