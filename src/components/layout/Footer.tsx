@@ -76,7 +76,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
         <p>&copy; {new Date().getFullYear()} ProductPilot AI. All rights reserved.</p>
         <p className="flex items-center gap-1">
-          Designed with <span className="text-red-500">&hearts;</span> for builders.
+          Designed with <span className="text-red-500">&hearts;</span> by MHS
         </p>
       </div>
     </footer>
