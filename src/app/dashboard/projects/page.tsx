@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
@@ -20,6 +21,7 @@ interface Project {
 }
 
 export default function ManageProjectsPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [isBulkClassifying, setIsBulkClassifying] = useState(false);
 
@@ -117,13 +119,15 @@ export default function ManageProjectsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
-            <Card key={project._id} className="hover:border-primary/50 transition-colors group flex flex-col">
+            <Card 
+              key={project._id} 
+              className="hover:border-primary/50 cursor-pointer transition-colors group flex flex-col relative"
+              onClick={() => router.push(`/dashboard/projects/${project._id}`)}
+            >
               <CardHeader className="pb-3 flex flex-row items-start justify-between">
                 <div>
                   <CardTitle className="mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-                    <Link href={`/dashboard/projects/${project._id}`}>
-                      {project.title}
-                    </Link>
+                    {project.title}
                   </CardTitle>
                   <CardDescription className="flex items-center gap-2">
                     <Badge variant="default">{project.category}</Badge>
@@ -132,7 +136,13 @@ export default function ManageProjectsPage() {
                     </Badge>
                   </CardDescription>
                 </div>
-                <button className="text-text-muted hover:text-foreground">
+                <button 
+                  className="text-text-muted hover:text-foreground relative z-10 p-1 rounded-full hover:bg-white/5 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    alert("Project settings coming soon!");
+                  }}
+                >
                   <MoreVertical className="w-5 h-5" />
                 </button>
               </CardHeader>

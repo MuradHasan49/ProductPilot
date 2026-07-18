@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
 import { api } from '@/lib/api';
@@ -11,6 +11,7 @@ import { Send, Bot, Sparkles, FileText, ListTodo, FileJson } from 'lucide-react'
 
 export default function AIWorkspacePage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const projectId = searchParams.get('project');
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([
     { role: 'assistant', content: "Hello! I'm your ProductPilot AI co-founder. I can help you brainstorm features, analyze risks, or generate structured documentation like PRDs and User Stories. What are we building today?" }
@@ -20,11 +21,25 @@ export default function AIWorkspacePage() {
   const [docType, setDocType] = useState<string>('Document');
   const [docLength, setDocLength] = useState<string>('medium');
   
+  const [ideaInput, setIdeaInput] = useState('');
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const generateProjectMutation = useMutation({
+    mutationFn: async (idea: string) => {
+      const res = await api.post('/ai/generate-project', { idea });
+      return res.data.data;
+    },
+    onSuccess: (data) => {
+      // Redirect to the newly created project in the AI workspace
+      router.push(`/dashboard/ai?project=${data._id}`);
+      setIdeaInput('');
+    }
+  });
 
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
@@ -61,12 +76,65 @@ export default function AIWorkspacePage() {
 
   if (!projectId) {
     return (
-      <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
-        <div className="text-center">
-          <Bot className="w-12 h-12 text-text-muted mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No Project Selected</h2>
-          <p className="text-text-muted">Please go to your projects and select one to open the AI workspace.</p>
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] max-w-4xl mx-auto px-4 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8 backdrop-blur-md animate-pulse">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <span className="text-sm font-semibold tracking-wide text-primary uppercase">Global Idea Generator</span>
         </div>
+        
+        <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight tracking-tight">
+          What are we <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">building</span> today?
+        </h1>
+        
+        <p className="text-text-muted text-lg md:text-xl mb-12 max-w-2xl">
+          Don't waste time filling out forms. Just describe your app idea in plain English, and our AI will bootstrap the entire project for you instantly.
+        </p>
+
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (ideaInput.trim()) generateProjectMutation.mutate(ideaInput);
+          }}
+          className="w-full relative group"
+        >
+          {/* Glowing background effect */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-emerald-400 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
+          
+          <div className="relative flex items-center bg-surface border border-white/10 rounded-2xl p-2 shadow-2xl focus-within:border-primary/50 transition-colors">
+            <input 
+              type="text"
+              value={ideaInput}
+              onChange={(e) => setIdeaInput(e.target.value)}
+              disabled={generateProjectMutation.isPending}
+              placeholder="e.g. I want to build an Uber for dog walking in my city..."
+              className="flex-1 bg-transparent border-none outline-none px-6 py-4 text-lg text-white placeholder:text-gray-500 disabled:opacity-50"
+            />
+            <Button 
+              type="submit" 
+              size="lg" 
+              disabled={!ideaInput.trim() || generateProjectMutation.isPending}
+              className="rounded-xl px-8 py-6 font-bold text-md shadow-lg flex items-center gap-2"
+            >
+              {generateProjectMutation.isPending ? (
+                <>
+                  <Bot className="w-5 h-5 animate-pulse" />
+                  Bootstrapping...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5" />
+                  Generate Project
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+
+        {generateProjectMutation.isPending && (
+          <div className="mt-8 text-sm text-gray-400 animate-pulse">
+            Structuring database schema, categorizing industry, estimating budget...
+          </div>
+        )}
       </div>
     );
   }
