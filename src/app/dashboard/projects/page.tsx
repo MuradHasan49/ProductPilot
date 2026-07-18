@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Plus, Search, FolderKanban, MoreVertical, Calendar, Sparkles } from 'lucide-react';
+import { Plus, Search, FolderKanban, MoreVertical, Calendar, Sparkles, X } from 'lucide-react';
 
 interface Project {
   _id: string;
@@ -22,8 +22,11 @@ interface Project {
 
 export default function ManageProjectsPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [isBulkClassifying, setIsBulkClassifying] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editForm, setEditForm] = useState({ title: '', category: '', visibility: 'private' });
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['projects'],
@@ -49,6 +52,26 @@ export default function ManageProjectsPage() {
     } finally {
       setIsBulkClassifying(false);
     }
+  };
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await api.patch(`/projects/${editingProject?._id}`, data);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setEditingProject(null);
+    },
+    onError: () => {
+      alert("Failed to update project");
+    }
+  });
+
+  const handleEditClick = (e: any, project: Project) => {
+    e.stopPropagation();
+    setEditingProject(project);
+    setEditForm({ title: project.title, category: project.category, visibility: project.visibility });
   };
 
   return (
@@ -138,10 +161,7 @@ export default function ManageProjectsPage() {
                 </div>
                 <button 
                   className="text-text-muted hover:text-foreground relative z-10 p-1 rounded-full hover:bg-white/5 transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    alert("Project settings coming soon!");
-                  }}
+                  onClick={(e) => handleEditClick(e, project)}
                 >
                   <MoreVertical className="w-5 h-5" />
                 </button>
@@ -154,6 +174,62 @@ export default function ManageProjectsPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-surface border border-border p-6 rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">Edit Project</h2>
+              <button onClick={() => setEditingProject(null)} className="text-gray-400 hover:text-white transition-colors">
+                <X className="w-5 h-5"/>
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-300 mb-1.5 block">Project Title</label>
+                <Input 
+                  value={editForm.title} 
+                  onChange={e => setEditForm({...editForm, title: e.target.value})} 
+                  placeholder="e.g. NextGen AI Tool"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-300 mb-1.5 block">Category</label>
+                <select 
+                  value={editForm.category}
+                  onChange={e => setEditForm({...editForm, category: e.target.value})}
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2.5 outline-none focus:border-primary text-sm"
+                >
+                  <option value="SaaS">SaaS</option>
+                  <option value="AI Tool">AI Tool</option>
+                  <option value="Marketplace">Marketplace</option>
+                  <option value="Mobile App">Mobile App</option>
+                  <option value="Web App">Web App</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-300 mb-1.5 block">Visibility</label>
+                <select 
+                  value={editForm.visibility}
+                  onChange={e => setEditForm({...editForm, visibility: e.target.value})}
+                  className="w-full bg-background border border-border rounded-lg px-4 py-2.5 outline-none focus:border-primary text-sm"
+                >
+                  <option value="private">Private (Only you)</option>
+                  <option value="public">Public (Visible in Explore)</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-border">
+                <Button variant="outline" onClick={() => setEditingProject(null)}>Cancel</Button>
+                <Button onClick={() => updateMutation.mutate(editForm)} disabled={updateMutation.isPending || !editForm.title.trim()}>
+                  {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
