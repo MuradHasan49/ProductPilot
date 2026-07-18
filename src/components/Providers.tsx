@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { api } from '@/lib/api';
+import { authClient } from '@/lib/auth-client';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -21,9 +22,15 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const res = await api.get('/auth/me');
-        if (res.data.success) {
-          setUser(res.data.data);
+        const { data: sessionData, error } = await authClient.getSession();
+        if (sessionData?.user) {
+          setUser({
+            _id: sessionData.user.id,
+            name: sessionData.user.name,
+            email: sessionData.user.email,
+            role: "user", // Default fallback if not on user object
+            avatar: sessionData.user.image,
+          });
         }
       } catch (err) {
         // Not authenticated, which is fine

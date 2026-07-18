@@ -18,6 +18,7 @@ export default function AIWorkspacePage() {
   const [input, setInput] = useState('');
   const [generatedDoc, setGeneratedDoc] = useState<string | null>(null);
   const [docType, setDocType] = useState<string>('Document');
+  const [docLength, setDocLength] = useState<string>('medium');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +41,7 @@ export default function AIWorkspacePage() {
 
   const generateMutation = useMutation({
     mutationFn: async (endpoint: 'prd' | 'user-stories') => {
-      const res = await api.post(`/ai/${endpoint}`, { projectId });
+      const res = await api.post(`/ai/${endpoint}`, { projectId, length: docLength });
       return res.data.data;
     },
     onSuccess: (data, variables) => {
@@ -125,25 +126,36 @@ export default function AIWorkspacePage() {
             <FileText className="w-5 h-5 text-secondary" />
             Document Output
           </h3>
-          <div className="flex gap-2">
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => generateMutation.mutate('prd')}
-              isLoading={generateMutation.isPending && generateMutation.variables === 'prd'}
+          <div className="flex flex-wrap items-center gap-3">
+            <select 
+              value={docLength} 
+              onChange={(e) => setDocLength(e.target.value)}
+              className="bg-background border border-border rounded-lg px-3 py-1.5 text-sm outline-none focus:border-primary"
             >
-              <FileJson className="w-4 h-4 mr-2" />
-              Generate PRD
-            </Button>
-            <Button 
-              size="sm" 
-              variant="primary"
-              onClick={() => generateMutation.mutate('user-stories')}
-              isLoading={generateMutation.isPending && generateMutation.variables === 'user-stories'}
-            >
-              <ListTodo className="w-4 h-4 mr-2" />
-              Generate Stories
-            </Button>
+              <option value="short">Short</option>
+              <option value="medium">Medium</option>
+              <option value="long">Detailed</option>
+            </select>
+            <div className="flex gap-2">
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => generateMutation.mutate('prd')}
+                isLoading={generateMutation.isPending && generateMutation.variables === 'prd'}
+              >
+                <FileJson className="w-4 h-4 mr-2" />
+                Generate PRD
+              </Button>
+              <Button 
+                size="sm" 
+                variant="primary"
+                onClick={() => generateMutation.mutate('user-stories')}
+                isLoading={generateMutation.isPending && generateMutation.variables === 'user-stories'}
+              >
+                <ListTodo className="w-4 h-4 mr-2" />
+                Generate Stories
+              </Button>
+            </div>
           </div>
         </div>
 

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/useAuthStore';
+import { authClient } from '@/lib/auth-client';
 
 export const api = axios.create({
   baseURL: 'http://localhost:8000/api',
@@ -16,10 +17,10 @@ api.interceptors.response.use(
       // If we are not already on the login page, clear cookie and redirect
       if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
         try {
-          // Call the backend logout to clear the httpOnly cookie so Next.js middleware doesn't loop
-          await axios.post('http://localhost:8000/api/auth/logout', {}, { withCredentials: true });
+          // Clear Better Auth session to prevent middleware loops
+          await authClient.signOut();
         } catch (e) {
-          console.error('Failed to clear cookie');
+          console.error('Failed to clear Better Auth session');
         }
         window.location.href = '/login';
       }

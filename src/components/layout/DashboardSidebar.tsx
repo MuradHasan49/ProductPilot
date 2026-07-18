@@ -12,7 +12,6 @@ export default function DashboardSidebar() {
     { name: 'Projects', href: '/dashboard/projects', icon: FolderKanban },
     { name: 'AI Workspace', href: '/dashboard/ai', icon: Sparkles },
     { name: 'Analytics', href: '/dashboard/analytics', icon: LineChart },
-    { name: 'Notifications', href: '/dashboard/notifications', icon: Bell },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];
 

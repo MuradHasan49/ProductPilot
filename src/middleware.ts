@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('pp_token')?.value;
+  // Better Auth uses different cookie names depending on the environment (secure vs non-secure)
+  const token = request.cookies.get('better-auth.session_token')?.value || request.cookies.get('__Secure-better-auth.session_token')?.value;
 
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard');
+  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/items');
 
   if (isProtectedRoute && !token) {
     const loginUrl = new URL('/login', request.url);
@@ -24,6 +25,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
+    '/items/:path*',
     '/login',
     '/register'
   ],

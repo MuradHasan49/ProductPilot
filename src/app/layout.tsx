@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ConditionalNavbar, ConditionalFooter } from "@/components/layout/ConditionalLayout";
 import Providers from "@/components/Providers";
+import AIChatWidget from "@/components/ui/AIChatWidget";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -31,6 +32,7 @@ export default function RootLayout({
             {children}
           </main>
           <ConditionalFooter />
+          <AIChatWidget />
         </Providers>
       </body>
     </html>

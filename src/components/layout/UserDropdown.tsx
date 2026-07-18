@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { api } from '@/lib/api';
+import { signOut } from '@/lib/auth-client';
 
 export default function UserDropdown() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -26,7 +27,7 @@ export default function UserDropdown() {
 
   const handleLogout = async () => {
     try {
-      await api.post('/auth/logout');
+      await signOut();
     } catch (error) {
       console.error("Logout API failed", error);
     } finally {
@@ -59,7 +60,6 @@ export default function UserDropdown() {
           {/* User Info Header */}
           <div className="px-4 py-3 border-b border-white/5 bg-black/20">
             <p className="text-sm font-bold text-white truncate">{displayName}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{displayRole}</p>
           </div>
 
           {/* Menu Links */}

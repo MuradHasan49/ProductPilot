@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Plus, Search, FolderKanban, MoreVertical, Calendar } from 'lucide-react';
+import { Plus, Search, FolderKanban, MoreVertical, Calendar, Sparkles } from 'lucide-react';
 
 interface Project {
   _id: string;
@@ -21,8 +21,9 @@ interface Project {
 
 export default function ManageProjectsPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isBulkClassifying, setIsBulkClassifying] = useState(false);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
       const res = await api.get('/projects');
@@ -35,6 +36,19 @@ export default function ManageProjectsPage() {
     p.category.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
+  const handleBulkClassify = async () => {
+    try {
+      setIsBulkClassifying(true);
+      const res = await api.post('/ai/bulk-classify');
+      alert(res.data.message);
+      refetch();
+    } catch (err: any) {
+      alert('Failed to bulk classify projects.');
+    } finally {
+      setIsBulkClassifying(false);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -42,12 +56,23 @@ export default function ManageProjectsPage() {
           <h1 className="text-3xl font-bold tracking-tight mb-1">Projects</h1>
           <p className="text-text-muted">Manage your product ideas and workspaces.</p>
         </div>
-        <Link href="/dashboard/projects/add">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            New Project
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            onClick={handleBulkClassify}
+            disabled={isBulkClassifying}
+            className="border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10"
+          >
+            <Sparkles className={`w-4 h-4 mr-2 ${isBulkClassifying ? 'animate-spin' : ''}`} />
+            {isBulkClassifying ? 'Classifying...' : 'Bulk Auto-Classify'}
           </Button>
-        </Link>
+          <Link href="/dashboard/projects/add">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              New Project
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="flex items-center gap-4 bg-surface p-4 border border-border rounded-[16px]">

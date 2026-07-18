@@ -1,18 +1,41 @@
 "use client";
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { api } from '@/lib/api';
-import { useRouter } from 'next/navigation';
 import UserDropdown from './UserDropdown';
-
 import Image from 'next/image';
+import { Menu, X } from 'lucide-react';
 
 export default function Navbar() {
   const { isAuthenticated } = useAuthStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const loggedOutRoutes = [
+    { name: 'Home', href: '/' },
+    { name: 'Explore Ideas', href: '/explore' },
+    { name: 'Pricing', href: '/pricing' },
+    { name: 'About', href: '/about' },
+    { name: 'Contact', href: '/contact' },
+  ];
+
+  const loggedInRoutes = [
+    { name: 'Home', href: '/' },
+    { name: 'Explore Ideas', href: '/explore' },
+    { name: 'Pricing', href: '/pricing' },
+    { name: 'About', href: '/about' },
+    { name: 'Contact', href: '/contact' },
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'AI Workspace', href: '/dashboard/ai' },
+  ];
+
+  const routes = isAuthenticated ? loggedInRoutes : loggedOutRoutes;
 
   return (
-    <header className="sticky top-0 z-50 w-full glass border-b border-border">
+    <header className="sticky top-0 z-50 w-full glass border-b border-border bg-background/80 backdrop-blur-md">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
           <Image 
             src="/logo.png" 
@@ -25,15 +48,27 @@ export default function Navbar() {
             ProductPilot
           </span>
         </Link>
-        <nav className="hidden md:flex gap-6 items-center">
-          <Link href="/explore" className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
-            Explore Ideas
-          </Link>
-          <Link href="/pricing" className="text-sm font-medium text-text-muted hover:text-primary transition-colors">
-            Pricing
-          </Link>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex gap-6 items-center flex-1 justify-end mr-6">
+          {routes.map((route) => {
+            const isActive = pathname === route.href || (route.href !== '/' && route.href !== '/dashboard' && pathname.startsWith(route.href));
+            return (
+              <Link 
+                key={route.name} 
+                href={route.href} 
+                className={`text-sm font-medium transition-colors ${
+                  isActive ? 'text-primary' : 'text-text-muted hover:text-primary'
+                }`}
+              >
+                {route.name}
+              </Link>
+            )
+          })}
         </nav>
-        <div className="flex items-center gap-4">
+
+        {/* Actions */}
+        <div className="hidden md:flex items-center gap-4">
           {isAuthenticated ? (
             <div className="ml-2">
               <UserDropdown />
@@ -49,7 +84,63 @@ export default function Navbar() {
             </>
           )}
         </div>
+
+        {/* Mobile Menu Toggle */}
+        <button 
+          className="md:hidden p-2 text-text-muted hover:text-foreground transition-colors"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
+
+      {/* Mobile Navigation Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-border bg-surface shadow-2xl absolute w-full left-0 top-16 flex flex-col p-4 gap-4 animate-in slide-in-from-top-2">
+          <nav className="flex flex-col gap-4">
+            {routes.map((route) => {
+              const isActive = pathname === route.href || (route.href !== '/' && route.href !== '/dashboard' && pathname.startsWith(route.href));
+              return (
+                <Link 
+                  key={route.name} 
+                  href={route.href} 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`text-sm font-medium p-2 rounded-lg transition-colors ${
+                    isActive ? 'bg-primary/10 text-primary' : 'text-text-muted hover:bg-surface-hover hover:text-foreground'
+                  }`}
+                >
+                  {route.name}
+                </Link>
+              )
+            })}
+          </nav>
+          <div className="border-t border-border pt-4 flex flex-col gap-3">
+            {isAuthenticated ? (
+              <div className="flex items-center justify-between px-2">
+                <span className="text-sm font-medium text-text-muted">Account</span>
+                <UserDropdown />
+              </div>
+            ) : (
+              <>
+                <Link 
+                  href="/login" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full text-center py-2 text-sm font-medium text-foreground border border-border rounded-xl hover:bg-surface-hover transition-colors"
+                >
+                  Log in
+                </Link>
+                <Link 
+                  href="/register" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full text-center py-2 text-sm font-medium bg-primary text-white rounded-xl hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
