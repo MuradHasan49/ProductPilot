@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { Sparkles, Calendar, DollarSign, Tag, Target, Briefcase, ChevronRight, Star, ExternalLink, Activity } from 'lucide-react';
 import Link from 'next/link';
@@ -37,6 +38,21 @@ const getGradient = (category: string) => {
 
 export default function DetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
+  const router = useRouter();
+
+  const cloneMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.post(`/projects/${id}/clone`);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success('Project cloned successfully!');
+      router.push(`/dashboard/projects/${data.data._id}`);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'Failed to clone project. Make sure you are logged in.');
+    }
+  });
 
   const { data: project, isLoading, error } = useQuery({
     queryKey: ['publicProject', id],
@@ -248,11 +264,21 @@ export default function DetailsPage({ params }: { params: Promise<{ id: string }
 
               <div className="mt-8 pt-6 border-t border-white/5">
                 <button 
-                  onClick={() => toast.info('Feature coming soon!', { description: 'Direct messaging will be available in the next update.' })}
-                  className="w-full py-4 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all flex items-center justify-center gap-2 group"
+                  onClick={() => cloneMutation.mutate()}
+                  disabled={cloneMutation.isPending}
+                  className="w-full py-4 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  Contact Creator
-                  <ExternalLink className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity" />
+                  {cloneMutation.isPending ? (
+                    <>
+                      <Sparkles className="w-5 h-5 animate-spin" />
+                      Cloning to Workspace...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                      Clone to My Workspace
+                    </>
+                  )}
                 </button>
               </div>
             </div>
