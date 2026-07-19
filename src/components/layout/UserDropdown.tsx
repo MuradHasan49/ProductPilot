@@ -49,7 +49,7 @@ export default function UserDropdown() {
       >
         <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white shadow-sm overflow-hidden uppercase">
           {user?.avatar ? (
-            <img src={user.avatar} alt={user.name || "User"} className="w-full h-full object-cover" />
+            <img src={user.avatar} alt={user.name || "User"} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
           ) : (
             user?.name?.substring(0, 2) || <User className="w-4 h-4" />
           )}

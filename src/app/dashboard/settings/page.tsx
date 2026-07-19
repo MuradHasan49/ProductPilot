@@ -56,7 +56,7 @@ export default function SettingsPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8">
             <div className="h-32 w-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-4xl font-bold text-white shadow-xl overflow-hidden uppercase border-[4px] border-[#1e2330]">
               {avatar ? (
-                <img src={avatar} alt={name} className="w-full h-full object-cover" />
+                <img src={avatar} alt={name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
               ) : (
                 name ? name.substring(0, 2) : user?.name?.substring(0, 2) || <User className="w-12 h-12" />
               )}
