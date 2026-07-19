@@ -236,73 +236,56 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {isProjectsLoading ? (
               [1, 2, 3, 4].map(i => (
-                <div key={i} className="flex flex-col bg-surface/50 border border-border rounded-2xl h-[480px] overflow-hidden">
-                  <Skeleton className="h-48 w-full bg-white/5 shrink-0" />
-                  <div className="p-5 flex flex-col flex-grow">
-                    <Skeleton className="h-6 w-3/4 mb-3 bg-white/5 rounded" />
-                    <Skeleton className="h-4 w-full mb-2 bg-white/5 rounded" />
-                    <Skeleton className="h-4 w-5/6 mb-6 bg-white/5 rounded" />
-                    <Skeleton className="h-11 w-full bg-primary/20 rounded-xl mt-auto" />
+                <div key={i} className="flex flex-col bg-surface/50 border border-border rounded-2xl h-[340px] overflow-hidden p-6">
+                  <div className="flex justify-between mb-5">
+                    <Skeleton className="h-6 w-1/3 bg-white/5 rounded" />
+                    <Skeleton className="h-6 w-6 bg-white/5 rounded-full" />
+                  </div>
+                  <Skeleton className="h-8 w-3/4 mb-3 bg-white/5 rounded" />
+                  <Skeleton className="h-4 w-full mb-2 bg-white/5 rounded" />
+                  <Skeleton className="h-4 w-5/6 mb-6 bg-white/5 rounded" />
+                  <div className="mt-auto flex flex-col gap-4">
+                    <Skeleton className="h-4 w-full bg-white/5 rounded" />
+                    <Skeleton className="h-11 w-full bg-primary/20 rounded-xl" />
                   </div>
                 </div>
               ))
             ) : (
               latestProjects?.map((project: any) => (
-                <div key={project._id} className="group flex flex-col bg-surface/30 border border-white/10 rounded-2xl overflow-hidden hover:bg-surface/60 hover:border-white/20 transition-all duration-300 hover:-translate-y-1 shadow-lg h-[480px]">
+                <div key={project._id} className="group flex flex-col bg-surface/30 border border-white/10 rounded-2xl overflow-hidden hover:bg-surface hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 shadow-lg p-6 h-[340px]">
                   
-                  {/* Image Banner */}
-                  <div className={`h-48 w-full shrink-0 relative ${
-                    project.coverImage 
-                      ? 'bg-cover bg-center' 
-                      : `bg-gradient-to-br ${getGradient(project.category)}`
-                  }`}
-                  style={project.coverImage ? { backgroundImage: `url(${project.coverImage})` } : {}}
-                  >
-                    {!project.coverImage && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                        <Sparkles className="w-12 h-12 text-white/50" />
-                      </div>
-                    )}
-                    <div className="absolute top-4 right-4">
-                      <span className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-black/50 backdrop-blur-md text-white border border-white/20 rounded-full shadow-lg">
-                        {project.category}
-                      </span>
-                    </div>
+                  {/* Category Badge & Icon */}
+                  <div className="flex items-start justify-between mb-5">
+                     <span className={`px-3 py-1 text-xs font-bold uppercase tracking-wider bg-gradient-to-r ${getGradient(project.category)} text-white rounded-md shadow-sm`}>
+                       {project.category}
+                     </span>
+                     <Sparkles className="w-5 h-5 text-gray-500 group-hover:text-primary transition-colors" />
                   </div>
 
-                  {/* Card Content */}
-                  <div className="p-5 flex flex-col flex-grow">
-                    <h3 className="text-xl font-bold text-white line-clamp-1 mb-2" title={project.title}>
+                  {/* Text Content */}
+                  <div className="flex flex-col flex-grow">
+                    <h3 className="text-2xl font-extrabold text-white line-clamp-1 mb-2 group-hover:text-primary transition-colors" title={project.title}>
                       {project.title}
                     </h3>
-                    <p className="text-gray-400 text-sm line-clamp-2 mb-6 leading-relaxed flex-grow">
+                    <p className="text-gray-400 text-sm line-clamp-3 leading-relaxed flex-grow">
                       {project.description || project.tagline || 'A new innovative project seeking community support to launch successfully.'}
                     </p>
-                    
-                    {/* Meta Info */}
-                    <div className="space-y-3 mb-6 mt-auto">
-                      <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
-                        <DollarSign className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                        <span className="truncate">
-                          {project.budget ? `$${project.budget.toLocaleString()} Budget` : 'Flexible Budget'}
-                        </span>
+                  </div>
+                  
+                  {/* Footer */}
+                  <div className="mt-4 flex flex-col gap-4">
+                    <div className="flex items-center justify-between border-t border-white/5 pt-4">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+                        <Tag className="w-3.5 h-3.5 text-purple-400" />
+                        <span className="truncate max-w-[120px]">{project.industry || 'General Industry'}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
-                        <Calendar className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                        <span className="truncate">
-                          Listed {new Date(project.createdAt || Date.now()).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
-                        <Tag className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                        <span className="truncate">
-                          {project.industry || 'General Industry'}
-                        </span>
+                      <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+                        <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                        <span>{new Date(project.createdAt || Date.now()).toLocaleDateString()}</span>
                       </div>
                     </div>
 
-                    {/* View Details Link */}
-                    <Link href={`/explore/${project._id}`} className="shrink-0 w-full py-2.5 px-4 bg-white/5 hover:bg-primary hover:text-white border border-white/10 hover:border-primary text-gray-300 font-medium rounded-xl flex items-center justify-center gap-2 transition-all mt-auto group-hover:bg-primary group-hover:text-white group-hover:border-primary">
+                    <Link href={`/explore/${project._id}`} className="shrink-0 w-full py-2.5 px-4 bg-white/5 hover:bg-primary text-white border border-transparent font-medium rounded-xl flex items-center justify-center gap-2 transition-all">
                       View Details
                       <ArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
                     </Link>

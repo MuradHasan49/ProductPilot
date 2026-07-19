@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import { Sparkles, Calendar, DollarSign, Tag, Target, Briefcase, ChevronRight, Star, ExternalLink, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { toast } from 'sonner';
 
 interface Project {
   _id: string;
@@ -106,25 +107,22 @@ export default function DetailsPage({ params }: { params: Promise<{ id: string }
       </div>
 
       <div className="container mx-auto px-4 max-w-6xl">
-        {/* Main Hero / Image Gallery Area */}
-        <div className={`relative w-full h-[400px] md:h-[500px] rounded-[32px] overflow-hidden mb-12 border border-white/10 shadow-2xl ${!project.coverImage ? `bg-gradient-to-br ${getGradient(project.category)}` : ''}`}>
-          {project.coverImage ? (
-            <img src={project.coverImage} alt={project.title} className="w-full h-full object-cover" />
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
-              <Sparkles className="w-20 h-20 text-white/30 mb-6" />
-              <h1 className="text-3xl md:text-5xl font-extrabold text-white text-center max-w-3xl px-4 tracking-tight drop-shadow-lg">
-                {project.title}
-              </h1>
-            </div>
-          )}
-          
-          <div className="absolute bottom-6 left-6 flex gap-3">
-            <span className="px-4 py-2 text-sm font-bold uppercase tracking-wider bg-black/60 backdrop-blur-md text-white border border-white/20 rounded-xl shadow-lg flex items-center gap-2">
-              <Tag className="w-4 h-4 text-purple-400" />
+        {/* Typography Hero Area */}
+        <div className="mb-12 pt-8">
+          <div className="flex items-center gap-3 mb-6">
+            <span className={`px-4 py-2 text-sm font-bold uppercase tracking-wider bg-gradient-to-r ${getGradient(project.category)} text-white rounded-xl shadow-lg flex items-center gap-2`}>
+              <Sparkles className="w-4 h-4" />
               {project.category}
             </span>
           </div>
+          <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight">
+            {project.title}
+          </h1>
+          {project.tagline && (
+            <p className="text-xl md:text-2xl text-gray-400 max-w-3xl leading-relaxed">
+              {project.tagline}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -134,12 +132,7 @@ export default function DetailsPage({ params }: { params: Promise<{ id: string }
             
             {/* Overview Section */}
             <section>
-              {project.coverImage && (
-                <h1 className="text-4xl font-extrabold text-white mb-4 tracking-tight">{project.title}</h1>
-              )}
-              {project.tagline && (
-                <p className="text-xl text-primary font-medium mb-6">{project.tagline}</p>
-              )}
+
               
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
@@ -176,21 +169,33 @@ export default function DetailsPage({ params }: { params: Promise<{ id: string }
               </section>
             )}
 
-            {/* Reviews Section */}
+            {/* AI Assets Section */}
             <section>
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-yellow-500/20 text-yellow-400 flex items-center justify-center">
-                  <Star className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4" />
                 </div>
-                Reviews & Ratings
+                Generated AI Assets
               </h2>
-              <div className="bg-surface/30 border border-dashed border-white/10 rounded-3xl p-12 text-center flex flex-col items-center">
-                <Star className="w-12 h-12 text-gray-600 mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">No Reviews Yet</h3>
-                <p className="text-gray-400 max-w-sm mb-6">This project is new and hasn't received any community reviews or ratings.</p>
-                <button className="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium rounded-xl transition-colors">
-                  Be the first to review
-                </button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-surface/30 p-6 rounded-3xl border border-white/5 flex items-start gap-4 hover:border-primary/30 transition-colors group">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <Activity className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white mb-1">Product Requirements</h3>
+                    <p className="text-sm text-gray-400">Comprehensive PRD with problem statement, solutions, and success metrics.</p>
+                  </div>
+                </div>
+                <div className="bg-surface/30 p-6 rounded-3xl border border-white/5 flex items-start gap-4 hover:border-primary/30 transition-colors group">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <Briefcase className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white mb-1">User Stories</h3>
+                    <p className="text-sm text-gray-400">Agile user stories with clear acceptance criteria and priority levels.</p>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -200,16 +205,16 @@ export default function DetailsPage({ params }: { params: Promise<{ id: string }
           <div className="space-y-8">
             
             {/* Key Information / Specifications */}
-            <div className="bg-surface/50 border border-white/10 rounded-3xl p-8 sticky top-24">
+            <div className="bg-surface/50 border border-white/10 rounded-3xl p-8">
               <h3 className="text-xl font-bold text-white mb-6 border-b border-white/5 pb-4">Key Specifications</h3>
               
               <div className="space-y-6">
                 <div>
                   <p className="text-sm text-gray-500 mb-1 flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-emerald-400" /> Budget
+                    <Sparkles className="w-4 h-4 text-emerald-400" /> Generation Status
                   </p>
                   <p className="text-lg font-semibold text-white">
-                    {project.budget ? `$${project.budget.toLocaleString()}` : 'Flexible / TBD'}
+                    100% AI Generated
                   </p>
                 </div>
 
@@ -242,7 +247,10 @@ export default function DetailsPage({ params }: { params: Promise<{ id: string }
               </div>
 
               <div className="mt-8 pt-6 border-t border-white/5">
-                <button className="w-full py-4 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all flex items-center justify-center gap-2 group">
+                <button 
+                  onClick={() => toast.info('Feature coming soon!', { description: 'Direct messaging will be available in the next update.' })}
+                  className="w-full py-4 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all flex items-center justify-center gap-2 group"
+                >
                   Contact Creator
                   <ExternalLink className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity" />
                 </button>
@@ -264,13 +272,28 @@ export default function DetailsPage({ params }: { params: Promise<{ id: string }
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {relatedProjects.map((rel) => (
-              <Link href={`/explore/${rel._id}`} key={rel._id} className="group flex flex-col bg-surface/30 border border-white/10 rounded-2xl overflow-hidden hover:bg-surface/60 hover:border-white/20 transition-all duration-300 hover:-translate-y-1 shadow-lg">
-                <div className="p-6">
-                  <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{rel.title}</h3>
-                  <p className="text-sm text-gray-400 line-clamp-2 mb-4">{rel.description}</p>
-                  <div className="flex items-center text-primary text-sm font-medium gap-1 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">
-                    View Details <ChevronRight className="w-4 h-4" />
-                  </div>
+              <Link href={`/explore/${rel._id}`} key={rel._id} className="group flex flex-col bg-surface/30 border border-white/10 rounded-2xl overflow-hidden hover:bg-surface hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 shadow-lg p-6 h-[220px]">
+                  
+                <div className="flex items-start justify-between mb-4">
+                  <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r ${getGradient(rel.category)} text-white rounded shadow-sm`}>
+                    {rel.category}
+                  </span>
+                  <Sparkles className="w-4 h-4 text-gray-500 group-hover:text-primary transition-colors" />
+                </div>
+
+                <div className="flex flex-col flex-grow">
+                  <h3 className="text-lg font-extrabold text-white line-clamp-1 mb-2 group-hover:text-primary transition-colors" title={rel.title}>{rel.title}</h3>
+                  <p className="text-sm text-gray-400 line-clamp-2 flex-grow">{rel.description}</p>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                   <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+                     <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                     <span>{new Date(rel.createdAt).toLocaleDateString()}</span>
+                   </div>
+                   <div className="flex items-center text-primary text-sm font-medium gap-1 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">
+                     <ChevronRight className="w-4 h-4" />
+                   </div>
                 </div>
               </Link>
             ))}

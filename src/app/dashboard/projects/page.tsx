@@ -18,6 +18,7 @@ interface Project {
   category: string;
   status: string;
   visibility: string;
+  tagline?: string;
   createdAt: string;
 }
 
@@ -116,11 +117,17 @@ export default function ManageProjectsPage() {
             variant="outline" 
             onClick={handleBulkClassify}
             disabled={isBulkClassifying}
-            className="border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10"
+            className="border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10 hidden sm:flex"
           >
             <Sparkles className={`w-4 h-4 mr-2 ${isBulkClassifying ? 'animate-spin' : ''}`} />
             {isBulkClassifying ? 'Classifying...' : 'Bulk Auto-Classify'}
           </Button>
+          <Link href="/dashboard/ai">
+            <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/10 hidden sm:flex">
+              <Sparkles className="w-4 h-4 mr-2" />
+              Generate with AI
+            </Button>
+          </Link>
           <Link href="/dashboard/projects/add">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
@@ -164,10 +171,18 @@ export default function ManageProjectsPage() {
             <FolderKanban className="w-8 h-8 text-text-muted" />
           </div>
           <h3 className="text-xl font-semibold mb-2">No projects found</h3>
-          <p className="text-text-muted mb-6">Get started by creating your first product workspace.</p>
-          <Link href="/dashboard/projects/add">
-            <Button variant="outline">Create Project</Button>
-          </Link>
+          <p className="text-text-muted mb-6">Get started by creating your first product workspace or let AI build it for you.</p>
+          <div className="flex items-center justify-center gap-3">
+            <Link href="/dashboard/ai">
+              <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/10">
+                <Sparkles className="w-4 h-4 mr-2" />
+                Generate with AI
+              </Button>
+            </Link>
+            <Link href="/dashboard/projects/add">
+              <Button>Create Manually</Button>
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -197,6 +212,9 @@ export default function ManageProjectsPage() {
                 </button>
               </CardHeader>
               <CardContent className="mt-auto relative z-10">
+                {project.tagline && (
+                  <p className="text-sm text-gray-300 line-clamp-2 mt-4">{project.tagline}</p>
+                )}
                 <div className="flex items-center gap-2 text-sm text-text-muted mt-4">
                   <Calendar className="w-4 h-4" />
                   <span>Created {new Date(project.createdAt).toLocaleDateString()}</span>

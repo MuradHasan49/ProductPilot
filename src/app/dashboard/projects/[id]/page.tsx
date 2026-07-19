@@ -6,14 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft, Edit, Sparkles, BrainCircuit, FileText, ListTodo, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Sparkles, BrainCircuit, FileText, ListTodo, Trash2, Copy } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+
+import { useState } from 'react';
 
 export default function ProjectDetailsPage() {
   const params = useParams();
   const projectId = params.id;
   const queryClient = useQueryClient();
+  const [documentToDelete, setDocumentToDelete] = useState<any>(null);
+
+  const handleCopy = (content: string) => {
+    navigator.clipboard.writeText(content);
+    toast.success('Document copied to clipboard!');
+  };
 
   const deleteDocMutation = useMutation({
     mutationFn: async (docId: string) => {
@@ -21,9 +29,11 @@ export default function ProjectDetailsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents', projectId] });
+      setDocumentToDelete(null);
       toast.success("Document deleted successfully");
     },
     onError: () => {
+      setDocumentToDelete(null);
       toast.error("Failed to delete document");
     }
   });
@@ -135,11 +145,15 @@ export default function ProjectDetailsPage() {
                       <div className="flex items-center gap-4">
                         <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
                         <button 
-                          onClick={() => {
-                            if(confirm('Are you sure you want to delete this document?')) {
-                              deleteDocMutation.mutate(doc._id);
-                            }
-                          }}
+                          onClick={() => handleCopy(doc.content)}
+                          className="text-text-muted hover:text-primary transition-colors flex items-center gap-1"
+                          title="Copy Document"
+                        >
+                          <Copy className="w-3 h-3" />
+                          Copy
+                        </button>
+                        <button 
+                          onClick={() => setDocumentToDelete(doc)}
                           className="text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
                           disabled={deleteDocMutation.isPending}
                         >
@@ -181,11 +195,15 @@ export default function ProjectDetailsPage() {
                       <div className="flex items-center gap-4">
                         <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
                         <button 
-                          onClick={() => {
-                            if(confirm('Are you sure you want to delete this document?')) {
-                              deleteDocMutation.mutate(doc._id);
-                            }
-                          }}
+                          onClick={() => handleCopy(doc.content)}
+                          className="text-text-muted hover:text-secondary transition-colors flex items-center gap-1"
+                          title="Copy Document"
+                        >
+                          <Copy className="w-3 h-3" />
+                          Copy
+                        </button>
+                        <button 
+                          onClick={() => setDocumentToDelete(doc)}
                           className="text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
                           disabled={deleteDocMutation.isPending}
                         >
@@ -209,6 +227,38 @@ export default function ProjectDetailsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {documentToDelete && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-surface border border-red-500/20 p-6 rounded-2xl w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4 mx-auto">
+              <Trash2 className="w-6 h-6 text-red-500" />
+            </div>
+            <h2 className="text-xl font-bold text-center mb-2">Delete Document?</h2>
+            <p className="text-text-muted text-center text-sm mb-6">
+              Are you sure you want to delete <span className="text-foreground font-medium">"{documentToDelete.title}"</span>? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => setDocumentToDelete(null)}
+                disabled={deleteDocMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button 
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white border-none"
+                onClick={() => deleteDocMutation.mutate(documentToDelete._id)}
+                disabled={deleteDocMutation.isPending}
+              >
+                {deleteDocMutation.isPending ? 'Deleting...' : 'Yes, Delete'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
