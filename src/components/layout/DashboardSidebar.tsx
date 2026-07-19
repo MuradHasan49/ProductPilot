@@ -1,11 +1,21 @@
 "use client";
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FolderKanban, Sparkles, LineChart, Bell, Settings } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { LayoutDashboard, FolderKanban, Sparkles, LineChart, Bell, Settings, LogOut } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
+import { authClient } from '@/lib/auth-client';
 import Image from 'next/image';
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    await authClient.signOut();
+    logout();
+    router.push('/login');
+  };
 
   const links = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -53,6 +63,23 @@ export default function DashboardSidebar() {
           );
         })}
       </nav>
+
+      <div className="p-4 border-t border-border mt-auto space-y-4">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-medium text-text-muted hover:bg-surface-hover hover:text-foreground transition-colors border border-border/50"
+        >
+          <LogOut className="w-4 h-4" />
+          Logout
+        </button>
+
+        <div className="bg-surface-hover/50 border border-border/50 rounded-xl p-4 text-center space-y-2">
+          <p className="text-sm font-medium text-text-muted">Need help?</p>
+          <a href="mailto:support@productpilot.ai" className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors block">
+            Contact Support
+          </a>
+        </div>
+      </div>
     </aside>
   );
 }
