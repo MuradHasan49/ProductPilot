@@ -120,8 +120,6 @@ export default function ExplorePage() {
             >
               <option className="bg-surface" value="newest">Newest First</option>
               <option className="bg-surface" value="oldest">Oldest First</option>
-              <option className="bg-surface" value="budget_high">Highest Budget</option>
-              <option className="bg-surface" value="budget_low">Lowest Budget</option>
             </select>
           </div>
         </div>
