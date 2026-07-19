@@ -299,7 +299,7 @@ export default function Home() {
 
       {/* 2. Features Section */}
       <section id="features" className="py-24 bg-surface/50 border-y border-border scroll-mt-16">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything you need to ship faster</h2>
             <p className="text-text-muted max-w-2xl mx-auto">Stop writing boilerplate documentation. Let our specialized AI agents handle the heavy lifting while you focus on the vision.</p>
@@ -335,7 +335,7 @@ export default function Home() {
 
       {/* 3. How It Works Section */}
       <section className="py-24 border-b border-border">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">How ProductPilot Works</h2>
             <p className="text-text-muted max-w-2xl mx-auto">From a messy idea to a perfectly structured agile project in 4 simple steps.</p>
@@ -365,7 +365,7 @@ export default function Home() {
 
       {/* 4. Statistics Section */}
       <section className="py-24 bg-surface/30 border-b border-border">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-surface/50 border border-white/5">
               <Users className="w-8 h-8 text-blue-400 mb-4" />
@@ -517,7 +517,7 @@ export default function Home() {
         {/* BG Glows */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-[500px] bg-primary/10 blur-[120px] rounded-full pointer-events-none -z-10" />
         
-        <div className="container mx-auto px-4 text-center">
+        <div className="container mx-auto px-4 text-center max-w-7xl">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to accelerate your workflow?</h2>
           <p className="text-xl text-text-muted mb-10 max-w-2xl mx-auto">Join the next generation of product managers and founders. Stop writing and start building today.</p>
           <Link href="/register">

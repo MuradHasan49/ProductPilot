@@ -14,7 +14,7 @@ export default function Navbar() {
 
   const loggedOutRoutes = [
     { name: 'Home', href: '/', icon: Home },
-    { name: 'Explore Ideas', href: '/explore', icon: Compass },
+    { name: 'Ideas', href: '/explore', icon: Compass },
     { name: 'Pricing', href: '/pricing', icon: Tag },
     { name: 'About', href: '/about', icon: Info },
     { name: 'Contact', href: '/contact', icon: Mail },
@@ -22,7 +22,7 @@ export default function Navbar() {
 
   const loggedInRoutes = [
     { name: 'Home', href: '/', icon: Home },
-    { name: 'Explore Ideas', href: '/explore', icon: Compass },
+    { name: 'Ideas', href: '/explore', icon: Compass },
     { name: 'Pricing', href: '/pricing', icon: Tag },
     { name: 'About', href: '/about', icon: Info },
     { name: 'Contact', href: '/contact', icon: Mail },
@@ -35,7 +35,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full glass border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="container mx-auto px-4 max-w-7xl h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
           <Image 
