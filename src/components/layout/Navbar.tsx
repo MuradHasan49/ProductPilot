@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import UserDropdown from './UserDropdown';
 import Image from 'next/image';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Home, Compass, Tag, Info, Mail, LayoutDashboard, Sparkles, PlusCircle } from 'lucide-react';
 
 export default function Navbar() {
   const { isAuthenticated } = useAuthStore();
@@ -13,21 +13,22 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const loggedOutRoutes = [
-    { name: 'Home', href: '/' },
-    { name: 'Explore Ideas', href: '/explore' },
-    { name: 'Pricing', href: '/pricing' },
-    { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
+    { name: 'Home', href: '/', icon: Home },
+    { name: 'Explore Ideas', href: '/explore', icon: Compass },
+    { name: 'Pricing', href: '/pricing', icon: Tag },
+    { name: 'About', href: '/about', icon: Info },
+    { name: 'Contact', href: '/contact', icon: Mail },
   ];
 
   const loggedInRoutes = [
-    { name: 'Home', href: '/' },
-    { name: 'Explore Ideas', href: '/explore' },
-    { name: 'Pricing', href: '/pricing' },
-    { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
-    { name: 'Dashboard', href: '/dashboard' },
-    { name: 'AI Workspace', href: '/dashboard/ai' },
+    { name: 'Home', href: '/', icon: Home },
+    { name: 'Explore Ideas', href: '/explore', icon: Compass },
+    { name: 'Pricing', href: '/pricing', icon: Tag },
+    { name: 'About', href: '/about', icon: Info },
+    { name: 'Contact', href: '/contact', icon: Mail },
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'AI Workspace', href: '/dashboard/ai', icon: Sparkles },
+    { name: 'New Idea', href: '/dashboard/projects', icon: PlusCircle },
   ];
 
   const routes = isAuthenticated ? loggedInRoutes : loggedOutRoutes;
@@ -57,10 +58,11 @@ export default function Navbar() {
               <Link 
                 key={route.name} 
                 href={route.href} 
-                className={`text-sm font-medium transition-colors ${
+                className={`flex items-center text-sm font-medium transition-colors ${
                   isActive ? 'text-primary' : 'text-text-muted hover:text-primary'
                 }`}
               >
+                <route.icon className="w-4 h-4 mr-1.5" />
                 {route.name}
               </Link>
             )
@@ -105,10 +107,11 @@ export default function Navbar() {
                   key={route.name} 
                   href={route.href} 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`text-sm font-medium p-2 rounded-lg transition-colors ${
+                  className={`flex items-center text-sm font-medium p-2 rounded-lg transition-colors ${
                     isActive ? 'bg-primary/10 text-primary' : 'text-text-muted hover:bg-surface-hover hover:text-foreground'
                   }`}
                 >
+                  <route.icon className="w-5 h-5 mr-3" />
                   {route.name}
                 </Link>
               )

@@ -62,8 +62,8 @@ export default function LoginPage() {
   };
 
   const handleDemoLogin = () => {
-    setValue('email', 'demo@example.com');
-    setValue('password', 'password123');
+    setValue('email', 'mhs@gmail.com');
+    setValue('password', 'Aa123456');
     
     // Slight delay to let user see the auto-filled credentials before submitting
     setTimeout(() => {

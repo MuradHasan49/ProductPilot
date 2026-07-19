@@ -47,8 +47,12 @@ export default function UserDropdown() {
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         className="flex items-center gap-2 p-1 rounded-full hover:bg-white/5 transition-colors focus:outline-none"
       >
-        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm border border-white/10 overflow-hidden">
-          {initial}
+        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white shadow-sm overflow-hidden uppercase">
+          {user?.avatar ? (
+            <img src={user.avatar} alt={user.name || "User"} className="w-full h-full object-cover" />
+          ) : (
+            user?.name?.substring(0, 2) || <User className="w-4 h-4" />
+          )}
         </div>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
       </button>

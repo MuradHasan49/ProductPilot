@@ -16,6 +16,7 @@ const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
+  avatar: z.string().url('Must be a valid URL').optional().or(z.literal('')),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -40,6 +41,7 @@ export default function RegisterPage() {
         email: data.email,
         password: data.password,
         name: data.name,
+        image: data.avatar,
       });
 
       if (authError) {
@@ -49,7 +51,7 @@ export default function RegisterPage() {
 
       if (authData?.user) {
         setUser({
-            _id: authData.user.id,
+            id: authData.user.id,
             name: authData.user.name,
             email: authData.user.email,
             role: "user",
@@ -109,6 +111,14 @@ export default function RegisterPage() {
             placeholder="••••••••"
             {...register('password')}
             error={errors.password?.message}
+          />
+          
+          <Input
+            label="Profile Picture URL (Optional)"
+            type="url"
+            placeholder="https://example.com/avatar.jpg"
+            {...register('avatar')}
+            error={errors.avatar?.message}
           />
 
           <Button type="submit" className="w-full mt-6 rounded-xl py-6 font-semibold" isLoading={isSubmitting}>
