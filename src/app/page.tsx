@@ -106,7 +106,7 @@ export default function Home() {
                 <span className="text-sm font-semibold tracking-wide text-blue-400 uppercase">ProductPilot AI 2.0 is live</span>
               </div>
               
-              <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1] min-h-[160px] md:min-h-[180px]">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1] min-h-[140px] md:min-h-[180px] break-words">
                 Your AI-Powered <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 transition-all duration-500">
                   {roles[roleIndex]}

@@ -26,7 +26,7 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col bg-background text-foreground overflow-x-hidden w-full">
         <Providers>
           <ConditionalNavbar />
           <main className="flex-1 flex flex-col">
