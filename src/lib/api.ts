@@ -3,7 +3,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { authClient } from '@/lib/auth-client';
 
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: typeof window !== 'undefined' ? '/api' : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
   withCredentials: true,
 });
 
