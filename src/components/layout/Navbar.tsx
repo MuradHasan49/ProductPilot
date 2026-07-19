@@ -27,7 +27,7 @@ export default function Navbar() {
     { name: 'About', href: '/about', icon: Info },
     { name: 'Contact', href: '/contact', icon: Mail },
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'AI Workspace', href: '/dashboard/ai', icon: Sparkles },
+    { name: 'AI', href: '/dashboard/ai', icon: Sparkles },
     { name: 'New Idea', href: '/dashboard/projects', icon: PlusCircle },
   ];
 
@@ -51,7 +51,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden xl:flex gap-4 2xl:gap-6 items-center flex-1 justify-end mr-4 2xl:mr-6">
+        <nav className="hidden lg:flex gap-4 xl:gap-6 items-center flex-1 justify-end mr-4 xl:mr-6">
           {routes.map((route) => {
             const isActive = pathname === route.href || (route.href !== '/' && route.href !== '/dashboard' && pathname.startsWith(route.href));
             return (
@@ -70,7 +70,7 @@ export default function Navbar() {
         </nav>
 
         {/* Actions */}
-        <div className="hidden xl:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-4">
           {isAuthenticated ? (
             <div className="ml-2">
               <UserDropdown />
@@ -89,7 +89,7 @@ export default function Navbar() {
 
         {/* Mobile Menu Toggle */}
         <button 
-          className="xl:hidden p-2 text-text-muted hover:text-foreground transition-colors"
+          className="lg:hidden p-2 text-text-muted hover:text-foreground transition-colors"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -98,7 +98,7 @@ export default function Navbar() {
 
       {/* Mobile Navigation Dropdown */}
       {isMobileMenuOpen && (
-        <div className="xl:hidden border-t border-border bg-surface shadow-2xl absolute w-full left-0 top-16 flex flex-col p-4 gap-4 animate-in slide-in-from-top-2">
+        <div className="lg:hidden border-t border-border bg-surface shadow-2xl absolute w-full left-0 top-16 flex flex-col p-4 gap-4 animate-in slide-in-from-top-2">
           <nav className="flex flex-col gap-4">
             {routes.map((route) => {
               const isActive = pathname === route.href || (route.href !== '/' && route.href !== '/dashboard' && pathname.startsWith(route.href));
