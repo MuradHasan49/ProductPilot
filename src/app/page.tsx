@@ -118,7 +118,7 @@ export default function Home() {
               </p>
               
               <div className="flex flex-col sm:flex-row items-center gap-4">
-                <Link href="/register" className="w-full sm:w-auto">
+                <Link href="/dashboard/projects" className="w-full sm:w-auto">
                   <button className="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-2xl hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.3)] transition-all duration-300 flex items-center justify-center gap-2 group">
                     Start Building Free
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
