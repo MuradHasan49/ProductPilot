@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
@@ -14,6 +14,18 @@ export default function AIWorkspacePage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const projectId = searchParams.get('project');
+  const docId = searchParams.get('docId');
+  const [currentDocId, setCurrentDocId] = useState<string | null>(docId || null);
+  
+  const { data: documents } = useQuery({
+    queryKey: ['documents', projectId],
+    queryFn: async () => {
+      const res = await api.get(`/projects/${projectId}/documents`);
+      return res.data.data;
+    },
+    enabled: !!projectId && !!docId
+  });
+
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([
     { role: 'assistant', content: "Hello! I'm your ProductPilot AI co-founder. I can help you brainstorm features, analyze risks, or generate structured documentation like PRDs and User Stories. What are we building today?" }
   ]);
@@ -31,6 +43,18 @@ export default function AIWorkspacePage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (documents && docId) {
+      const doc = documents.find((d: any) => d._id === docId);
+      if (doc) {
+        setGeneratedDoc(doc.content);
+        setDocType(doc.type);
+        setDocTitle(doc.title);
+        setCurrentDocId(doc._id);
+      }
+    }
+  }, [documents, docId]);
 
   const generateProjectMutation = useMutation({
     mutationFn: async (idea: string) => {
@@ -66,6 +90,7 @@ export default function AIWorkspacePage() {
       setGeneratedDoc(data);
       setDocType(variables === 'prd' ? 'PRD' : 'User Stories');
       setDocTitle(`AI Generated ${variables === 'prd' ? 'PRD' : 'User Stories'} - ${new Date().toLocaleDateString()}`);
+      setCurrentDocId(null); // Reset since it's a new generation
       setIsEditingDoc(false);
     }
   });
@@ -73,15 +98,30 @@ export default function AIWorkspacePage() {
   const saveDocMutation = useMutation({
     mutationFn: async () => {
       if (!generatedDoc || !projectId) throw new Error("Missing data");
-      const res = await api.post(`/projects/${projectId}/documents`, {
-        title: docTitle,
-        type: docType,
-        content: generatedDoc
-      });
-      return res.data;
+      
+      if (currentDocId) {
+        // Update existing document
+        const res = await api.patch(`/projects/${projectId}/documents/${currentDocId}`, {
+          title: docTitle,
+          type: docType,
+          content: generatedDoc
+        });
+        return res.data;
+      } else {
+        // Create new document
+        const res = await api.post(`/projects/${projectId}/documents`, {
+          title: docTitle,
+          type: docType,
+          content: generatedDoc
+        });
+        return res.data;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Document saved to project successfully!");
+      if (data?.data?._id) {
+        setCurrentDocId(data.data._id);
+      }
       setIsEditingDoc(false);
     },
     onError: () => {

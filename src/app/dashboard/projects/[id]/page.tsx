@@ -1,17 +1,32 @@
 "use client";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft, Edit, Sparkles, BrainCircuit, FileText, ListTodo } from 'lucide-react';
+import { ArrowLeft, Edit, Sparkles, BrainCircuit, FileText, ListTodo, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function ProjectDetailsPage() {
   const params = useParams();
   const projectId = params.id;
+  const queryClient = useQueryClient();
+
+  const deleteDocMutation = useMutation({
+    mutationFn: async (docId: string) => {
+      await api.delete(`/projects/${projectId}/documents/${docId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents', projectId] });
+      toast.success("Document deleted successfully");
+    },
+    onError: () => {
+      toast.error("Failed to delete document");
+    }
+  });
 
   const { data: project, isLoading, error } = useQuery({
     queryKey: ['project', projectId],
@@ -117,8 +132,22 @@ export default function ProjectDetailsPage() {
                     <h4 className="font-semibold mb-1">{doc.title}</h4>
                     <p className="text-sm text-text-muted mb-3 line-clamp-2">{doc.content.substring(0, 150)}...</p>
                     <div className="flex items-center justify-between text-xs text-text-muted">
-                      <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
-                      <Link href={`/dashboard/ai?project=${project._id}`} className="text-primary hover:underline font-medium">Open in Workspace &rarr;</Link>
+                      <div className="flex items-center gap-4">
+                        <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                        <button 
+                          onClick={() => {
+                            if(confirm('Are you sure you want to delete this document?')) {
+                              deleteDocMutation.mutate(doc._id);
+                            }
+                          }}
+                          className="text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+                          disabled={deleteDocMutation.isPending}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Delete
+                        </button>
+                      </div>
+                      <Link href={`/dashboard/ai?project=${project._id}&docId=${doc._id}`} className="text-primary hover:underline font-medium">Open in Workspace &rarr;</Link>
                     </div>
                   </div>
                 ))}
@@ -149,8 +178,22 @@ export default function ProjectDetailsPage() {
                     <h4 className="font-semibold mb-1">{doc.title}</h4>
                     <p className="text-sm text-text-muted mb-3 line-clamp-2">{doc.content.substring(0, 150)}...</p>
                     <div className="flex items-center justify-between text-xs text-text-muted">
-                      <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
-                      <Link href={`/dashboard/ai?project=${project._id}`} className="text-secondary hover:underline font-medium">Open in Workspace &rarr;</Link>
+                      <div className="flex items-center gap-4">
+                        <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                        <button 
+                          onClick={() => {
+                            if(confirm('Are you sure you want to delete this document?')) {
+                              deleteDocMutation.mutate(doc._id);
+                            }
+                          }}
+                          className="text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+                          disabled={deleteDocMutation.isPending}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Delete
+                        </button>
+                      </div>
+                      <Link href={`/dashboard/ai?project=${project._id}&docId=${doc._id}`} className="text-secondary hover:underline font-medium">Open in Workspace &rarr;</Link>
                     </div>
                   </div>
                 ))}

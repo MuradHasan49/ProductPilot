@@ -33,7 +33,9 @@ export default function DashboardSidebar() {
       </div>
       <nav className="flex-1 p-4 space-y-2">
         {links.map((link) => {
-          const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+          const isActive = link.href === '/dashboard'
+            ? pathname === '/dashboard'
+            : pathname === link.href || pathname.startsWith(`${link.href}/`);
           const Icon = link.icon;
           return (
             <Link
