@@ -27,6 +27,7 @@ export default function ManageProjectsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isBulkClassifying, setIsBulkClassifying] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editForm, setEditForm] = useState({ title: '', category: '', visibility: 'private' });
 
   const { data, isLoading, error, refetch } = useQuery({
@@ -77,10 +78,12 @@ export default function ManageProjectsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       setEditingProject(null);
+      setIsDeleteDialogOpen(false);
       toast.success("Project deleted successfully");
     },
     onError: () => {
       toast.error("Failed to delete project");
+      setIsDeleteDialogOpen(false);
     }
   });
 
@@ -255,9 +258,7 @@ export default function ManageProjectsPage() {
                   className="text-red-400 border-red-500/20 hover:bg-red-500/10 hover:border-red-500/30"
                   onClick={(e) => {
                     e.preventDefault();
-                    if(confirm('Are you sure you want to delete this project? This cannot be undone.')) {
-                      deleteMutation.mutate(editingProject._id);
-                    }
+                    setIsDeleteDialogOpen(true);
                   }}
                   disabled={deleteMutation.isPending}
                 >
@@ -271,6 +272,38 @@ export default function ManageProjectsPage() {
                   </Button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteDialogOpen && editingProject && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-surface border border-red-500/20 p-6 rounded-2xl w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4 mx-auto">
+              <Trash2 className="w-6 h-6 text-red-500" />
+            </div>
+            <h2 className="text-xl font-bold text-center mb-2">Delete Project?</h2>
+            <p className="text-text-muted text-center text-sm mb-6">
+              Are you sure you want to delete <span className="text-foreground font-medium">"{editingProject.title}"</span>? This action cannot be undone and will permanently remove all associated data.
+            </p>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => setIsDeleteDialogOpen(false)}
+                disabled={deleteMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button 
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white border-none"
+                onClick={() => deleteMutation.mutate(editingProject._id)}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? 'Deleting...' : 'Yes, Delete'}
+              </Button>
             </div>
           </div>
         </div>
