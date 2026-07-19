@@ -7,9 +7,12 @@ import { Sparkles, Calendar, DollarSign, Tag, Target, Briefcase, ChevronRight, S
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { toast } from 'sonner';
+import { useSession } from '@/lib/auth-client';
+import { Edit } from 'lucide-react';
 
 interface Project {
   _id: string;
+  ownerId: string;
   title: string;
   category: string;
   tagline?: string;
@@ -39,18 +42,27 @@ const getGradient = (category: string) => {
 export default function DetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
   const router = useRouter();
+  const { data: session } = useSession();
 
   const cloneMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (intent?: string) => {
       const res = await api.post(`/projects/${id}/clone`);
-      return res.data;
+      return { responseData: res.data, intent };
     },
-    onSuccess: (data) => {
+    onSuccess: (result) => {
+      const { responseData, intent } = result;
       toast.success('Project cloned successfully!');
-      router.push(`/dashboard/projects/${data.data._id}`);
+      if (intent) {
+        router.push(`/dashboard/ai?project=${responseData.data._id}&intent=${intent}`);
+      } else {
+        router.push(`/dashboard/projects/${responseData.data._id}`);
+      }
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.message || 'Failed to clone project. Make sure you are logged in.');
+      if (err.response?.status === 401) {
+        router.push('/login');
+      }
     }
   });
 
@@ -61,6 +73,8 @@ export default function DetailsPage({ params }: { params: Promise<{ id: string }
       return res.data.data as Project;
     }
   });
+
+  const isOwner = session?.user?.id === project?.ownerId;
 
   const { data: relatedProjects } = useQuery({
     queryKey: ['relatedProjects', project?.category],
@@ -194,24 +208,36 @@ export default function DetailsPage({ params }: { params: Promise<{ id: string }
                 Generated AI Assets
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-surface/30 p-6 rounded-3xl border border-white/5 flex items-start gap-4 hover:border-primary/30 transition-colors group">
+                <button 
+                  onClick={() => isOwner ? router.push(`/dashboard/ai?project=${id}&intent=prd`) : cloneMutation.mutate('prd')}
+                  disabled={cloneMutation.isPending && !isOwner}
+                  className="bg-surface/30 p-6 rounded-3xl border border-white/5 flex items-start gap-4 hover:border-primary/30 transition-all group text-left w-full hover:bg-surface/50 disabled:opacity-50"
+                >
                   <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                     <Activity className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="font-bold text-white mb-1">Product Requirements</h3>
-                    <p className="text-sm text-gray-400">Comprehensive PRD with problem statement, solutions, and success metrics.</p>
+                    <p className="text-sm text-gray-400">
+                      {isOwner ? 'Open in AI Workspace to generate a PRD.' : 'Clone to AI Workspace to generate a comprehensive PRD.'}
+                    </p>
                   </div>
-                </div>
-                <div className="bg-surface/30 p-6 rounded-3xl border border-white/5 flex items-start gap-4 hover:border-primary/30 transition-colors group">
+                </button>
+                <button 
+                  onClick={() => isOwner ? router.push(`/dashboard/ai?project=${id}&intent=user_stories`) : cloneMutation.mutate('user_stories')}
+                  disabled={cloneMutation.isPending && !isOwner}
+                  className="bg-surface/30 p-6 rounded-3xl border border-white/5 flex items-start gap-4 hover:border-primary/30 transition-all group text-left w-full hover:bg-surface/50 disabled:opacity-50"
+                >
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                     <Briefcase className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="font-bold text-white mb-1">User Stories</h3>
-                    <p className="text-sm text-gray-400">Agile user stories with clear acceptance criteria and priority levels.</p>
+                    <p className="text-sm text-gray-400">
+                      {isOwner ? 'Open in AI Workspace to generate stories.' : 'Clone to AI Workspace to generate agile user stories.'}
+                    </p>
                   </div>
-                </div>
+                </button>
               </div>
             </section>
 
@@ -263,23 +289,33 @@ export default function DetailsPage({ params }: { params: Promise<{ id: string }
               </div>
 
               <div className="mt-8 pt-6 border-t border-white/5">
-                <button 
-                  onClick={() => cloneMutation.mutate()}
-                  disabled={cloneMutation.isPending}
-                  className="w-full py-4 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {cloneMutation.isPending ? (
-                    <>
-                      <Sparkles className="w-5 h-5 animate-spin" />
-                      Cloning to Workspace...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
-                      Clone to My Workspace
-                    </>
-                  )}
-                </button>
+                {isOwner ? (
+                  <button 
+                    onClick={() => router.push(`/dashboard/projects/${id}`)}
+                    className="w-full py-4 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all flex items-center justify-center gap-2 group"
+                  >
+                    <Edit className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                    Open Project
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => cloneMutation.mutate()}
+                    disabled={cloneMutation.isPending}
+                    className="w-full py-4 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {cloneMutation.isPending ? (
+                      <>
+                        <Sparkles className="w-5 h-5 animate-spin" />
+                        Cloning to Workspace...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                        Clone to My Workspace
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
 

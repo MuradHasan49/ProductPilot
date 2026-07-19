@@ -1,12 +1,13 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { useParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft, Edit, Sparkles, BrainCircuit, FileText, ListTodo, Trash2, Copy } from 'lucide-react';
+import { Input } from '@/components/ui/Input';
+import { ArrowLeft, Edit, Sparkles, BrainCircuit, FileText, ListTodo, Trash2, Copy, X } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
@@ -15,8 +16,12 @@ import { useState } from 'react';
 export default function ProjectDetailsPage() {
   const params = useParams();
   const projectId = params.id;
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [documentToDelete, setDocumentToDelete] = useState<any>(null);
+  
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ title: '', category: '', visibility: 'private' });
 
   const handleCopy = (content: string) => {
     navigator.clipboard.writeText(content);
@@ -43,6 +48,27 @@ export default function ProjectDetailsPage() {
     queryFn: async () => {
       const res = await api.get(`/projects/${projectId}`);
       return res.data.data;
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await api.patch(`/projects/${projectId}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+      setIsEditModalOpen(false);
+      toast.success("Project updated successfully");
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      await api.delete(`/projects/${projectId}`);
+    },
+    onSuccess: () => {
+      toast.success("Project deleted");
+      router.push('/dashboard/projects');
     }
   });
 
@@ -82,7 +108,14 @@ export default function ProjectDetailsPage() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Projects
         </Link>
-        <Button variant="outline" size="sm">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => {
+            setEditForm({ title: project.title, category: project.category, visibility: project.visibility });
+            setIsEditModalOpen(true);
+          }}
+        >
           <Edit className="w-4 h-4 mr-2" />
           Edit Details
         </Button>
@@ -255,6 +288,93 @@ export default function ProjectDetailsPage() {
               >
                 {deleteDocMutation.isPending ? 'Deleting...' : 'Yes, Delete'}
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Edit Project Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-surface border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-white">Edit Project</h2>
+              <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4 mb-8">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">Project Title</label>
+                <Input 
+                  value={editForm.title} 
+                  onChange={(e) => setEditForm({...editForm, title: e.target.value})} 
+                  placeholder="Project Name" 
+                  className="bg-black/20"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">Category</label>
+                <select 
+                  className="flex h-10 w-full rounded-md border border-input bg-black/20 px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+                  value={editForm.category}
+                  onChange={(e) => setEditForm({...editForm, category: e.target.value})}
+                >
+                  <option className="bg-surface text-white" value="SaaS">SaaS</option>
+                  <option className="bg-surface text-white" value="Mobile App">Mobile App</option>
+                  <option className="bg-surface text-white" value="Web App">Web App</option>
+                  <option className="bg-surface text-white" value="E-commerce">E-commerce</option>
+                  <option className="bg-surface text-white" value="FinTech">FinTech</option>
+                  <option className="bg-surface text-white" value="HealthTech">HealthTech</option>
+                  <option className="bg-surface text-white" value="EdTech">EdTech</option>
+                  <option className="bg-surface text-white" value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">Visibility</label>
+                <select 
+                  className="flex h-10 w-full rounded-md border border-input bg-black/20 px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+                  value={editForm.visibility}
+                  onChange={(e) => setEditForm({...editForm, visibility: e.target.value})}
+                >
+                  <option className="bg-surface text-white" value="private">Private (Only me)</option>
+                  <option className="bg-surface text-white" value="public">Public (Visible in Explore)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-white/5">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  if(confirm('Are you sure you want to delete this project? This cannot be undone.')) {
+                    deleteMutation.mutate();
+                  }
+                }}
+                disabled={deleteMutation.isPending}
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="hover:bg-white/5 text-gray-300"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="bg-primary hover:bg-primary-hover text-white border-none"
+                  onClick={() => updateMutation.mutate(editForm)}
+                  disabled={updateMutation.isPending}
+                >
+                  {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
