@@ -213,7 +213,7 @@ npm run dev    # starts on http://localhost:3000
 | Generate AI Documents    | —                       | ✅             |
 | Edit / Delete Projects   | —                       | ✅ (Own only)  |
 
----
+--
 
 ## 🌍 Deployment
 
