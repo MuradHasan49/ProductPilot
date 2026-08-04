@@ -224,7 +224,6 @@ npm run dev    # starts on http://localhost:3000
 | Database | MongoDB Atlas   | Cloud-hosted NoSQL database. |
 
 ---
-## M H S
 
 ## 📞 Contact & Links
 
@@ -232,3 +231,5 @@ npm run dev    # starts on http://localhost:3000
 - **Portfolio:** [muradhasan49.vercel.app](https://muradhasan49.vercel.app/)
 
 ---
+
+## Build by M H S
