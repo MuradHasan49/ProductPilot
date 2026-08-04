@@ -229,3 +229,5 @@ npm run dev    # starts on http://localhost:3000
 
 - **LinkedIn:** [linkedin.com/in/muradhasan49](https://www.linkedin.com/in/muradhasan49/)
 - **Portfolio:** [muradhasan49.vercel.app](https://muradhasan49.vercel.app/)
+
+---
